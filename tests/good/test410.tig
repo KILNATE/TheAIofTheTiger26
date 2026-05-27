@@ -1,0 +1,32 @@
+/* fischer-yates shuffle */
+let
+  type iarr = array of int
+  var N := 10
+  var arr := iarr [N] of 0
+  var i := 0
+  var j := 0
+  var tmp := 0
+in
+  while i < N do
+  (
+  arr[i] := i;
+  i:=i+1
+  );
+  i := N-1;
+  while i >= 1 do
+  (
+    j := range (0,i);
+    tmp := arr[j];
+    arr[j] := arr[i];
+    arr[i] := tmp;
+    i := i-1
+  );
+  i:=0;
+  while i < N do
+  (
+  print_int(arr[i]);
+  print(", ");
+  i:=i+1
+  );
+  print("\n")
+end

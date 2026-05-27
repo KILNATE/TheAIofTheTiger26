@@ -1,0 +1,1 @@
+var x := (while 0 do print("coucou"); 1/0)

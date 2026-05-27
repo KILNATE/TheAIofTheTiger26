@@ -1,0 +1,5 @@
+let
+  var x := 42
+in
+  if x < 50 then print("less")
+end

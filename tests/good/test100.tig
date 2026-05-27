@@ -1,0 +1,10 @@
+let
+  type a = array of int
+  var x := a[4] of 10
+  var i := 2
+in
+  if i < 3 then (
+    if i = 2 then i := 1 else i := 3;
+    print_int(x[i])
+  )
+end

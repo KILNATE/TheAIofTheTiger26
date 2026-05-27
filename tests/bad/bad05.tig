@@ -1,0 +1,8 @@
+let
+  type int_array = array of int
+  var a := int_array [42] of 10
+  var i := 0
+in
+  if i = 0 then
+    print_int(a[5*10])
+end

@@ -1,0 +1,28 @@
+let
+  type int_arr = array of int
+  type int_mat = array of int_arr
+  var N := 10
+  var arr := int_arr[N] of 0
+  var mat := int_mat[N] of arr
+  var i := 0
+  var j := 0
+in
+  while i < N do(
+    mat[i] := int_arr[N] of 0;
+    i:=i+1
+  );
+  i:=0;
+  while i < N do(
+    mat[i][i] := 1;
+    i:=i+1
+  );
+  i:=0;
+  while i < N do (
+    while j < N do(
+      print_int(mat[i][j]);
+      j:=j+1
+    );
+    print("\n");
+    j := 0;
+    i := i+1)
+end

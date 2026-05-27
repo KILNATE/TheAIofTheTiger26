@@ -1,0 +1,9 @@
+let
+  var i := 0
+  var size := 100
+in
+  while i < (size-1) do(
+    i := i+2
+  );
+  if i <> 100 then print_int(1/0)
+end

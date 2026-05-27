@@ -1,0 +1,12 @@
+/* array init */
+let
+  type iarr = array of int
+  var arr := iarr [20] of 0
+  var i := 0
+in
+  while i <= range(0,20) do
+  (
+  arr[i] := i;
+  i:=i+1
+  )
+end

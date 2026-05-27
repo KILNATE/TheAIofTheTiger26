@@ -1,0 +1,6 @@
+let
+  var low := 50
+  var high := 50
+in
+  print_int(range(low,high))
+end

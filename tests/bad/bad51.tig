@@ -1,0 +1,9 @@
+let
+  type iarr = array of int
+  type imat = array of iarr
+  var arr := iarr [5] of 42
+  var mat := imat [5] of arr  
+  var idx := 0
+in
+  mat[(idx:=10;idx)][idx] := 31
+end

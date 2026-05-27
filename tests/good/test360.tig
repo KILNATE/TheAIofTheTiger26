@@ -1,0 +1,8 @@
+let
+  type iarr = array of int
+  var x := range (0,10)
+  var a := iarr[10] of 42
+in
+  x := x*2;
+  if x < 10 then print_int(a[x])
+end

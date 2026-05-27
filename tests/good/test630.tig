@@ -1,0 +1,14 @@
+let
+  type iarr = array of int
+  var buffer := iarr [5] of 0
+  var flag := range(0, 1)
+  var pos := 0
+in
+  if flag = 0 then
+    pos := range(0, 2)
+  else
+    pos := range(3, 4);
+
+  buffer[pos] := 2;
+  print_int(buffer[buffer[pos]])
+end

@@ -1,0 +1,10 @@
+let
+  type iarr = array of int
+  var arr := iarr[10] of 42
+  var idx1 := 0
+  var idx2 := 0
+  var tmp := 0
+in
+  tmp := (idx1:=5;0) + (idx2:=4; 1);
+  arr[tmp+idx1+idx2] := 0
+end

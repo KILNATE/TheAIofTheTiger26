@@ -1,0 +1,11 @@
+let type int_array = array of int
+    var tab := int_array [1000] of 51
+in
+  let var i := range (0,1001) in
+    print("tab[");
+    print_int(i);
+    print("]:");
+    print_int(tab[i]);
+    print("\n")
+  end
+end

@@ -1,0 +1,8 @@
+let
+  var idx := 0
+  type iarr = array of int
+  var arr := iarr[10] of 42
+in
+  idx := (let var idx := 1000 in idx / range(10,100) end);
+  arr[idx/10 - 1] := 32
+end

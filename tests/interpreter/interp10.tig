@@ -1,0 +1,5 @@
+let
+  var x := 10
+in
+  print_int(x)
+end

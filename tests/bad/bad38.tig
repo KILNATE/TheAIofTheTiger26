@@ -1,0 +1,16 @@
+let
+  type iarr = array of int
+  var N := 10
+  var arr := iarr [N] of 0
+  var i := 0
+  var j := 0
+  var tmp := 0
+in
+  i := N-1;
+  while i >= 1 do
+  (
+    j := range (0,i+1);
+    tmp := arr[j];
+    i := i-1
+  )
+end

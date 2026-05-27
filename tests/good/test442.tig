@@ -1,0 +1,7 @@
+type iarr = array of int
+var arr := iarr[100] of 42
+
+var idx := (range(1,5) * range(5,10) + range (0,50) * range(0,1)) / range(2,5)
+
+var access1 := arr[idx]
+var access2 := arr[idx-1]

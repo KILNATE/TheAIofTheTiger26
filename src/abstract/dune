@@ -1,0 +1,7 @@
+(include_subdirs no)
+
+(executables
+ (promote (until-clean))
+ (names tiger_abstract tests_abstract)
+ (libraries tiger_ai_lib)
+)

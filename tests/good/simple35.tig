@@ -1,0 +1,8 @@
+let
+  var x := range (0,500)
+in
+  if x > 100 then
+    (1/2)
+  else
+    (2/2)
+end

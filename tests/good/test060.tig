@@ -1,0 +1,7 @@
+let
+  type a = array of int
+  var x := a[3] of 42
+  var i := 1
+in
+  if i < 3 then print_int(x[i])
+end

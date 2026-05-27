@@ -1,0 +1,1 @@
+print_int (2 + let var x := 10 in x*4 end)

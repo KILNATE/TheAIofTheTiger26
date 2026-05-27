@@ -1,0 +1,12 @@
+let
+  var cpt := 0
+  var inside := 0
+  var N := 1000
+  var low := 50
+  var high := 50
+in
+  while cpt < N do
+    (if range(low,high) = 50 then inside := inside + 1;
+    cpt := cpt+1);
+    print_int(inside=N)
+end

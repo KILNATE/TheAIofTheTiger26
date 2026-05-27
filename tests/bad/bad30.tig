@@ -1,0 +1,6 @@
+let
+  type iarr = array of int
+  var arr := iarr [20] of 0
+in
+  arr[range(0,20)]
+end

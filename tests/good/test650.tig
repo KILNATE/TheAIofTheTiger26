@@ -1,0 +1,17 @@
+let
+  type iarr = array of int
+  var arr := iarr [8] of 0
+  var cond := range(0, 1)
+  var base := 0
+  var offset := range(0, 3)
+  var final := 0
+in
+  if cond = 0 then
+    base := 0
+  else
+    base := 4;
+
+  final := base + offset;
+  arr[final] := 7;
+  print_int(arr[final])
+end

@@ -1,0 +1,23 @@
+let
+  type a = array of int
+  var x := a[5] of 0
+  var i := 0
+  var count := 0
+  var value := 2
+in
+  x[0] := 1;
+  x[1] := 2;
+  x[2] := 3;
+  x[3] := 2;
+  x[4] := 2;
+  
+  while i < 5 do (
+    if x[i] = value then count := count + 1;
+    i := i + 1
+  );
+  print("number of occurrence of ");
+  print_int(value);
+  print(" : ");
+  print_int(count);
+  print("\n")
+end

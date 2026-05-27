@@ -1,0 +1,7 @@
+let
+  var x:=3
+in
+  while x < 10 do
+    x:=x+1;
+  1/2
+end

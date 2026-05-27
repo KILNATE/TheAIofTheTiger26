@@ -1,0 +1,8 @@
+let
+  type iarr = array of int
+  var arr := iarr [20] of 0
+  var x := range(0,10)
+  var y := range(0,10)
+in
+  arr[x+y]
+end

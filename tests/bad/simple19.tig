@@ -1,0 +1,3 @@
+var x := 0
+var y := range(0,1) & (x := x+1; 0)
+var z := 1/x

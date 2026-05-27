@@ -1,0 +1,6 @@
+let
+  var x:=3
+in
+  while x < 10 do
+    (x:=x+1; print_int(1/(11-x)))
+end

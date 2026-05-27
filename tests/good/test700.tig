@@ -1,0 +1,15 @@
+/* Dutch flag sort */
+let
+  type a = array of int
+  var x := a[10] of 0
+  var i := 0
+in
+  while i < 10 do
+    (x[i] := range(0,2);
+    i:=i+1);
+  i := 0;
+  while i < 10 do (
+    print_int(x[i]);
+    i := i + 1
+  )
+end

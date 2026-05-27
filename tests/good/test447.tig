@@ -1,0 +1,10 @@
+let
+  type iarr = array of int
+  var arr := iarr [20] of 0
+  var i := range (-1,20)
+  var j := range (-100,100)
+in
+  if (j = -1) then
+    if (i <> 20) then
+       if (i < j | i > j) then print_int(arr[i])
+end

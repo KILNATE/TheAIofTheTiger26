@@ -1,0 +1,10 @@
+let
+  var x := 2
+in
+  (let
+    var x := 4
+  in
+    print_int(x)
+  end;
+  print_int(x))
+end

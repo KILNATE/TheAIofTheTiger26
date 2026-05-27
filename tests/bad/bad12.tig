@@ -1,0 +1,10 @@
+let
+  type a = array of int
+  var a := a[4] of 0
+  var i := 3
+in
+  while i >= 0 do (
+    i := i - 1
+  );
+  a[i-1] := 2
+end

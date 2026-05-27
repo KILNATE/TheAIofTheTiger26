@@ -1,0 +1,21 @@
+let
+  type strArray = array of string
+  var words := strArray[5] of ""
+  var search := "tigre"
+  var count := 0
+  var i := 0
+in
+  words[0] := "lion";
+  words[1] := "tigre";
+  words[2] := "chat";
+  words[3] := "tigre";
+  words[4] := "lynx";
+  
+  while i < 5 do (
+    if words[i] = search then count := count + 1;
+    i := i + 1
+  );
+  print("Occurrences de 'tigre': ");
+  print_int(count);
+  print("\n")
+end

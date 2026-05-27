@@ -1,0 +1,7 @@
+(include_subdirs unqualified)
+
+(library
+ (name tiger_ai_lib)
+ (wrapped false)
+ (flags (:standard -w -27-39))
+ (libraries str))

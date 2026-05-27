@@ -1,0 +1,10 @@
+let
+  var x := 10
+in
+  let var cond := 0 in
+    while cond do
+      print("coucou");
+    x:=cond
+  end;
+  1/x
+end

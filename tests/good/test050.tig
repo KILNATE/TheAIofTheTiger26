@@ -1,0 +1,9 @@
+let
+  type a = array of int
+  var x := a[3] of 42
+  var bool1 := 1
+  var bool2 := 0
+in
+  print_int(x[(bool1 | bool2)])
+end
+

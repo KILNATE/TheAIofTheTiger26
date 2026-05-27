@@ -1,0 +1,7 @@
+(include_subdirs no)
+
+(executables
+ (promote (until-clean))
+ (names tiger_concrete tests_concrete)
+ (libraries tiger_ai_lib)
+)

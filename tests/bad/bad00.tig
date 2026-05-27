@@ -1,0 +1,7 @@
+let
+    type a = array of int
+    type b = a
+    var a : b := a[10] of 10
+in
+    a[13]
+end

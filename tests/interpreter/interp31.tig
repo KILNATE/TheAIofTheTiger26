@@ -1,0 +1,7 @@
+let
+  var x := -1
+in
+  while (x:=x+1; x) < 10 do(
+    print_int(x)
+  )
+end

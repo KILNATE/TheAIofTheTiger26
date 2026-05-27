@@ -1,0 +1,13 @@
+let
+  type a = array of int
+  var x := a[5] of 42
+  var i := 0
+  var min := 0
+in
+  min := x[0];
+  while i < 5 do (
+    if x[i] < min then min := x[i];
+    i := i + 1
+  );
+  print_int(min)
+end

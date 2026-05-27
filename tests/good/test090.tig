@@ -1,0 +1,7 @@
+let
+  type a = array of int
+  var x := a[5] of 42
+  var i := 2 + 1
+in
+  print_int(x[i])
+end

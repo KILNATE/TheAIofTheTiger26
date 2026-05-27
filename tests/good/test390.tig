@@ -1,0 +1,11 @@
+let
+  type iarr = array of int
+  var x := range (0,10)
+  var a := iarr[10] of 42
+in
+  x := x*2;
+  while x < 10 do
+   (print_int(a[x]);
+    x := range (0,10);
+    x := x*x)
+end

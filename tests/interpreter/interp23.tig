@@ -1,0 +1,6 @@
+let
+  var x := -42
+  var y := if x < 0 then -x else x 
+in
+  print (if y < 0 then "error" else "ok")
+end

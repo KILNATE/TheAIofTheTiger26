@@ -1,0 +1,10 @@
+let
+  var x := 10
+in
+  let var cond := range (0,100000000000) in
+    while cond do
+      cond:=range (0,100000000000);
+    x:=cond
+  end;
+  1/x
+end

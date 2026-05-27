@@ -1,0 +1,7 @@
+let
+  type iarr = array of int
+  var arr := iarr [20] of 0
+  var i := range (0,20)
+in
+  if (i <> 20) then print_int(arr[i])
+end

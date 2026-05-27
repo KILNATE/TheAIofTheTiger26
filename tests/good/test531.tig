@@ -1,0 +1,5 @@
+type iarr = array of int
+
+var a := iarr[range(10,20)] of 0
+
+var dummy := print_int(a[range(0,9)])

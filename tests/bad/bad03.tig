@@ -1,0 +1,8 @@
+let
+  type a = array of int
+  var x := a[3] of 42
+  var i := 0
+in
+  print_int(x[i-1])
+end
+

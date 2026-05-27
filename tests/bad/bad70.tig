@@ -1,0 +1,8 @@
+let
+  var idx := 0
+  var tmp := 0
+  type iarr = array of int
+  var arr := iarr[10] of 42
+in
+  if (((idx:=idx+5; idx) & (idx:=idx+5; idx)) & tmp < idx) then arr[idx] := 32
+end

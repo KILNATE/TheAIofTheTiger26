@@ -1,0 +1,7 @@
+let
+  type int_array = array of int
+  var a := int_array [10] of 0
+in
+  if range(0,1) then
+    print_int(a[10])
+end

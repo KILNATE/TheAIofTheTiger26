@@ -1,0 +1,10 @@
+let
+  type a = array of int
+  var a := a[4] of 0
+  var i := 0
+in
+  while i <= 2 do (
+    i := i + 1
+  );
+  a[i] := 42
+end

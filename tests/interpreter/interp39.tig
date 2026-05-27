@@ -1,0 +1,10 @@
+let
+  type a = array of int
+  var x := a[3] of 42
+  var i := 1
+in
+  x[0]:=41;
+  let var bool := i > 3 in
+    if bool then print_int(x[bool]) else print_int(x[bool])
+  end
+end

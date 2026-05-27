@@ -1,0 +1,6 @@
+let
+  var x:=0
+in
+  print_int(x);
+  1/42
+end

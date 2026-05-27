@@ -1,0 +1,9 @@
+let
+  var x := 10
+in
+  let var cond := range (0,100000000000) in
+    while cond do
+      (print_int(1/cond);
+       cond:=range (0,100000000000))
+  end
+end

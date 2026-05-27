@@ -1,0 +1,7 @@
+let
+  var idx := 0
+  type iarr = array of int
+  var arr := iarr[(idx:=10; 10)] of 42
+in
+  arr[idx] := 32
+end

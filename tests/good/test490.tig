@@ -1,0 +1,17 @@
+let
+  type int_arr = array of int
+  var i := 1
+  var idx := 0
+  var arr := int_arr[1] of 0
+in
+  while i <= 100000000 do (
+    i := i+range(0,1)
+  );
+  print_int(i);
+  print("\n");
+  (if i = 100000001 then
+    idx:=0
+  else
+    idx:=1);
+  print_int(arr[idx])
+end

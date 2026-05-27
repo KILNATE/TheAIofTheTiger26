@@ -1,0 +1,13 @@
+let
+  type a = array of int
+  var x := a[3] of 42
+  var i := 2
+in
+  x[1]:=0;
+  let
+    var tmp := i / 2
+  in  
+    if i = tmp * 2 then i := 1 else i := 2;
+    print_int(x[i])
+  end
+end

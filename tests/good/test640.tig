@@ -1,0 +1,10 @@
+let
+  type iarr = array of int
+  var data := iarr [6] of 0
+  var a := range(1, 3)
+  var b := range(0, 2)
+  var idx := 0
+in
+  idx := a + b;
+  print_int(data[idx])
+end

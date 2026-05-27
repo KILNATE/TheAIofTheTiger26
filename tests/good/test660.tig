@@ -1,0 +1,18 @@
+let
+  type iarr = array of int
+  var log := iarr [10] of 0
+  var event := range(0, 2)
+  var user := range(0, 1)
+  var slot := 0
+in
+  if event = 0 then
+    if user = 0 then
+      slot := 1
+    else
+      slot := 2
+  else
+    slot := 3 + user;
+
+  log[slot] := 1;
+  print_int(log[slot])
+end
