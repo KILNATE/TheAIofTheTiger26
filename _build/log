@@ -1,0 +1,17 @@
+# dune exec ./src/concrete/tests_concrete.exe -- --verbose
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /home/marouane.ammari/.cache/dune/db
+# Workspace root:
+# /afs/cri.epita.fr/user/m/ma/marouane.ammari/u/TheAIofTheTiger26
+# Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/marouane.ammari/.nix-profile/bin/ocamlc.opt -config > /tmp/dune_727884_output
