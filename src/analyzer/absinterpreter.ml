@@ -105,47 +105,117 @@ module Make (D : D) = struct
      (Value.Int) *)
   and analyze_binop (loc : location) (state : State.t) (left : Ast.expr)
       (right : Ast.expr) (op : Ast.binop) =
-     Format.asprintf "%s not implemented" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let left_a = analyze_expr state left in
+    let right_a = analyze_expr left_a.e_state right in
+    let v1 = Value.cast_int left.e_loc left_a.e_value in
+    let v2 = Value.cast_int right.e_loc right_a.e_value in
+    let res = match op with
+      | Add -> Absint.add v1 v2 | Sub -> Absint.sub v1 v2
+      | Mul -> Absint.mul v1 v2 | Div -> Absint.div v1 v2
+    in
+    build_expr loc (ABinop (left_a, op, right_a)) right_a.e_state (Value.Int res)
 
   (* Step 2: Analyze a comparison *)
   and analyze_relop (loc : location) (state : State.t) (left : Ast.expr)
       (right : Ast.expr) (op : Ast.relop) =
-     Format.asprintf "%s not implemented" __FUNCTION__ |> Utils.niy
+    let e1 = analyze_expr state left in
+    let e2 = analyze_expr e1.e_state right in
+    let cmp_result = relop_to_fun op e1.e_value e2.e_value in
+    Annotast.build_expr loc (ARelop (e1, op, e2)) e2.e_state (Value.Int cmp_result)
 
   (* Step 2: Analyzes a sequence of expressions in order, threading state
      through each one.  Returns the list of annotated expressions, the
      final state, and the value of the last expression. *)
   and analyze_seq (state : State.t) (exprs : Ast.expr list) :
       (State.t, Value.t) Annotast.expr list * State.t * Value.t =
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let annotated, st, v =
+      List.fold_left
+        (fun (acc, s, _) e ->
+          let r = analyze_expr s e in
+          (acc @ [ r ], r.e_state, r.e_value))
+        ([], state, Value.Void) exprs
+    in
+    (annotated, st, v)
 
   (* Step 2: Analyze an assignment.
      Hint: use write_value *)
   and analyze_assign loc (state : State.t) (left : Ast.lvalue)
       (right : Ast.expr) : (State.t, Value.t) Annotast.expr =
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let rhs = analyze_expr state right in
+    let lv = write_lvalue rhs.e_state left rhs.e_value in
+    Annotast.build_expr loc (AAssign (lv, rhs)) lv.l_state Value.Void
 
   (* Step 2: Analyze an array initialization by evaluating the size and
      content expressions. Returns the annotated expression and result. *)
   and analyze_array_init loc (state : State.t) (id : string) (size : expr)
       (content : expr) : (State.t, Value.t) Annotast.expr =
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let size_a = analyze_expr state size in
+    let content_a = analyze_expr size_a.e_state content in
+    let n = Value.cast_int size.e_loc size_a.e_value in
+    let arr = Value.array_make n content_a.e_value in
+    build_expr loc (AArrayInit (id, size_a, content_a)) content_a.e_state arr
 
   (* Step 2: Analyze a function call. Arguments are evaluated from left
      to right *)
   and analyze_funcall (state : State.t) loc (name : string) (args : expr list) :
       (State.t, Value.t) Annotast.expr =
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let evaluated, s =
+      List.fold_left
+        (fun (acc, s) arg ->
+          let ea = analyze_expr s arg in
+          (acc @ [ ea ], ea.e_state))
+        ([], state) args
+    in
+    let f = State.find_fun name s in
+    let res = f (List.map (fun e -> e.e_value) evaluated) in
+    build_expr loc (AFuncall (name, evaluated)) s res
 
   (* Step 2: Analyze a let-binding *)
   and analyze_let loc state chunks body =
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let chunks_annot, inner = analyze_chunks (State.enter_scope state) chunks in
+    let body_annot = analyze_expr inner body in
+    let outer = State.exit_scope body_annot.e_state in
+    build_expr loc (ALet (chunks_annot, body_annot)) outer body_annot.e_value
 
   (* Step 2: Analyze a boolean operation
      - Hint : use State.join *)
   and analyze_boolop (loc : location) (state : State.t) (left : Ast.expr)
       (right : Ast.expr) (op : Ast.boolop) =
-     Format.asprintf "%s not implemented" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let left_annot = analyze_expr state left in
+    let left_val = Value.cast_int left.e_loc left_annot.e_value in
+    let short_circuits =
+      match (op, Absint.truth left_val) with
+      | And, Domain.False -> true
+      | Or, Domain.True -> true
+      | _ -> false
+    in
+    if short_circuits then
+      let right_annot = analyze_expr State.empty right in
+      let v = match op with
+        | And -> Absint.of_int 0
+        | Or -> Absint.of_int 1
+      in
+      build_expr loc (ABoolop (left_annot, op, right_annot)) left_annot.e_state
+        (Value.Int v)
+    else
+      let must_eval = match (op, Absint.truth left_val) with
+        | And, Domain.True | Or, Domain.False -> true
+        | _ -> false
+      in
+      let right_annot = analyze_expr left_annot.e_state right in
+      let right_val = Value.cast_int right.e_loc right_annot.e_value in
+      let combined = boolop_to_fun op left_val right_val in
+      let final_s =
+        if must_eval then right_annot.e_state
+        else State.join left_annot.e_state right_annot.e_state
+      in
+      build_expr loc (ABoolop (left_annot, op, right_annot)) final_s
+        (Value.Int combined)
 
   (* Evaluates an lvalue to read its value.
      - If the lvalue is a variable, retrieves its value from the current state.
@@ -158,8 +228,13 @@ module Make (D : D) = struct
         let value = State.find_value id state in
         build_lval lv.l_loc (AVar id) state value
     | Array (lv', idx) ->
-     (* replace with your own code *)
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+        let base = read_lvalue state lv' in
+        let idx_annot = analyze_expr base.l_state idx in
+        let cells = Value.cast_array lv'.l_loc base.l_value in
+        let element =
+          Value.array_get cells (Value.cast_int idx.e_loc idx_annot.e_value)
+        in
+        build_lval lv.l_loc (AArray (base, idx_annot)) idx_annot.e_state element
 
   (* Evaluates an lvalue to perform a write operation.
      - If the lvalue is a variable, updates its value in the current state.
@@ -174,8 +249,13 @@ module Make (D : D) = struct
         let state = State.update_value id v state in
         build_lval lv.l_loc (AVar id) state Value.Void
     | Array (lv', idx) ->
-     (* replace with your own code *)
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+        let base = read_lvalue state lv' in
+        let idx_annot = analyze_expr base.l_state idx in
+        let cells = Value.cast_array lv'.l_loc base.l_value in
+        let updated =
+          Value.array_set cells (Value.cast_int idx.e_loc idx_annot.e_value) v
+        in
+        write_lvalue idx_annot.e_state lv' updated
 
   (* Step 3: Analyze an if-expression by evaluating the condition and both
      branches. Joins the resulting states and values.
@@ -187,8 +267,23 @@ module Make (D : D) = struct
      - Hint: use filter *)
   and analyze_if (state : State.t) (loc : location) (cond : expr) (tbr : expr)
       (fbr : expr option) : (State.t, Value.t) Annotast.expr =
-     (* replace with your own code *)
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let cond_annot = analyze_expr state cond in
+    let s_true = filter cond_annot.e_state cond_annot true in
+    let s_false = filter cond_annot.e_state cond_annot false in
+    let then_annot = analyze_expr s_true tbr in
+    match fbr with
+    | Some else_expr ->
+        let else_annot = analyze_expr s_false else_expr in
+        build_expr loc
+          (AIfThenElse (cond_annot, then_annot, Some else_annot))
+          (State.join then_annot.e_state else_annot.e_state)
+          (Value.join then_annot.e_value else_annot.e_value)
+    | None ->
+        build_expr loc
+          (AIfThenElse (cond_annot, then_annot, None))
+          (State.join then_annot.e_state s_false)
+          Value.Void
 
   (* [accumulate cond body initial] simulates one additional iteration of a while-loop:
   - It analyzes the loop condition [cond] under the current abstract state [initial].
@@ -214,8 +309,22 @@ module Make (D : D) = struct
    *)
   and unroll_while (state : State.t) (loc : location) (cond : expr)
       (body : expr) : (State.t, Value.t) Annotast.expr =
-     (* replace with your own code *)
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    let make_while_node inv =
+      let c = analyze_expr inv cond in
+      let b = analyze_expr (filter c.e_state c true) body in
+      build_expr loc (AWhile (c, b)) (filter c.e_state c false) Value.Void
+    in
+    let rec iter current n =
+      let next = accumulate cond body current in
+      if State.subset next current then
+        make_while_node current
+      else if n >= Utils.max_iter then
+        raise (Max_unroll current)
+      else
+        iter next (n + 1)
+    in
+    iter state 0
 
   (* Step 6: Analyze of a while-loop by computing a fixed point over the loop body.
      Repeatedly analyzes the condition and body under the filtered true state,
@@ -226,8 +335,17 @@ module Make (D : D) = struct
    model loop exit by filtering with condition false.  *)
   and fixpoint_while (state : State.t) (loc : location) (cond : expr)
       (body : expr) : (State.t, Value.t) Annotast.expr =
-     (* replace with your own code *)
-     Format.asprintf "%s" __FUNCTION__ |> Utils.niy
+    let open Annotast in
+    if State.is_empty state then
+      let c = analyze_expr state cond in
+      let b = analyze_expr state body in
+      build_expr loc (AWhile (c, b)) state Value.Void
+    else
+      let inv = fix (accumulate cond body) state in
+      let cond_a = analyze_expr inv cond in
+      let body_a = analyze_expr (filter cond_a.e_state cond_a true) body in
+      let after_loop = filter cond_a.e_state cond_a false in
+      build_expr loc (AWhile (cond_a, body_a)) after_loop Value.Void
 
   (* [analyze_while state loc cond body] analyzes a while-loop in two phases:
    - First tries to analyze using bounded unrolling (via [unroll_while]).
