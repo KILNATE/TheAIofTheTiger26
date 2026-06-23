@@ -19,8 +19,28 @@ let print fmt itv =
 
 (* join *)
 (* Step 4 *)
-let join _ _ = Top
-let widen _ _ = Top
+let join a b =
+  match (a, b) with
+  | Top, _ | _, Top -> Top
+  | Range (l1, h1), Range (l2, h2) -> Range (min l1 l2, max h1 h2)
+  | Minf u1, Minf u2 -> Minf (max u1 u2)
+  | Inf l1, Inf l2 -> Inf (min l1 l2)
+  | Minf _, Inf _ | Inf _, Minf _ -> Top
+  | Range (l, h), Minf u | Minf u, Range (l, h) -> Minf (max h u)
+  | Range (l, h), Inf lo | Inf lo, Range (l, h) -> Inf (min l lo)
+
+let widen old_v new_v =
+  match (old_v, new_v) with
+  | Top, _ | _, Top -> Top
+  | Range (l1, h1), Range (l2, h2) ->
+      let lo = if l2 < l1 then None else Some l1 in
+      let hi = if h2 > h1 then None else Some h1 in
+      (match (lo, hi) with
+       | None, None -> Top
+       | None, Some h -> Minf h
+       | Some l, None -> Inf l
+       | Some l, Some h -> Range (l, h))
+  | _ -> Top
 
 let subset a b =
   match (a, b) with
@@ -40,13 +60,34 @@ let neg (i : t) : t =
   | Minf x -> Inf (-x)
   | Range (l, u) -> Range (-u, -l)
 
-
-
 (* Step 4 *)
-let add _i1 _i2 = Top
-let sub _i1 _i2 = Top
-let mul _i1 _i2 = Top
-let div _i1 _i2 = Top
+let add a b =
+  match (a, b) with
+  | Range (l1, h1), Range (l2, h2) -> Range (l1 + l2, h1 + h2)
+  | Inf l1, Inf l2 -> Inf (l1 + l2)
+  | Minf u1, Minf u2 -> Minf (u1 + u2)
+  | Range (l, _), Inf lo | Inf lo, Range (l, _) -> Inf (l + lo)
+  | Range (_, h), Minf u | Minf u, Range (_, h) -> Minf (h + u)
+  | _ -> Top
+
+let sub a b = add a (neg b)
+
+let mul a b =
+  match (a, b) with
+  | Range (l1, h1), Range (l2, h2) ->
+      let products = [l1*l2; l1*h2; h1*l2; h1*h2] in
+      Range (List.fold_left min (List.hd products) (List.tl products),
+             List.fold_left max (List.hd products) (List.tl products))
+  | Range (0, 0), _ | _, Range (0, 0) -> Range (0, 0)
+  | _ -> Top
+
+let div a b =
+  match (a, b) with
+  | Range (l1, h1), Range (l2, h2) when l2 > 0 || h2 < 0 ->
+      let candidates = [l1/l2; l1/h2; h1/l2; h1/h2] in
+      Range (List.fold_left min (List.hd candidates) (List.tl candidates),
+             List.fold_left max (List.hd candidates) (List.tl candidates))
+  | _ -> Top
 
 (* truth handling *)
 let false_ = Range (0, 0)
@@ -68,12 +109,37 @@ let logical_or a b =
 
 (* comparisons *)
 (* Step 4 *)
-let eq _ _ = maybe_
+let get_low = function Range (l, _) -> Some l | Inf l -> Some l | _ -> None
+let get_high = function Range (_, h) -> Some h | Minf h -> Some h | _ -> None
+
+let eq a b =
+  match (a, b) with
+  | Range (l1, h1), Range (l2, h2) ->
+      if h1 < l2 || h2 < l1 then false_
+      else if l1 = h1 && l2 = h2 && l1 = l2 then true_
+      else maybe_
+  | _ -> maybe_
+
 let ne _ _ = maybe_
-let gt _ _ = maybe_
-let ge _ _ = maybe_
-let lt _ _ = maybe_
-let le _ _ = maybe_
+
+let lt a b =
+  match (get_high a, get_low b) with
+  | Some ha, Some lb when ha < lb -> true_
+  | _ ->
+    match (get_low a, get_high b) with
+    | Some la, Some hb when la >= hb -> false_
+    | _ -> maybe_
+
+let le a b =
+  match (get_high a, get_low b) with
+  | Some ha, Some lb when ha <= lb -> true_
+  | _ ->
+    match (get_low a, get_high b) with
+    | Some la, Some hb when la > hb -> false_
+    | _ -> maybe_
+
+let gt a b = lt b a
+let ge a b = le b a
 
 (* constructors *)
 let of_int x = Range (x, x)
@@ -101,13 +167,47 @@ let validate = function
 let filter_eq i1 i2 =
   match (i1, i2) with
   | Range (l1, h1), Range (l2, h2) ->
-      let l = max l1 l2 in
-      let h = min h1 h2 in
-      Range (l, h) |> validate
+      Range (max l1 l2, min h1 h2) |> validate
   | _ -> i1
 
-   let filter_ne i1 i2 = i1
-   let filter_gt i1 i2 = i1
-   let filter_ge i1 i2 = i1
-   let filter_lt i1 i2 = i1
-   let filter_le i1 i2 = i1
+let filter_ne i1 _i2 = i1
+
+let filter_gt i1 i2 =
+  match get_low i2 with
+  | Some l2 ->
+      (match i1 with
+       | Range (l, h) -> Range (max l (l2 + 1), h) |> validate
+       | Minf u -> Range (l2 + 1, u) |> validate
+       | Inf l -> Inf (max l (l2 + 1))
+       | Top -> Inf (l2 + 1))
+  | None -> i1
+
+let filter_ge i1 i2 =
+  match get_low i2 with
+  | Some l2 ->
+      (match i1 with
+       | Range (l, h) -> Range (max l l2, h) |> validate
+       | Minf u -> Range (l2, u) |> validate
+       | Inf l -> Inf (max l l2)
+       | Top -> Inf l2)
+  | None -> i1
+
+let filter_lt i1 i2 =
+  match get_high i2 with
+  | Some h2 ->
+      (match i1 with
+       | Range (l, h) -> Range (l, min h (h2 - 1)) |> validate
+       | Inf l -> Range (l, h2 - 1) |> validate
+       | Minf u -> Minf (min u (h2 - 1))
+       | Top -> Minf (h2 - 1))
+  | None -> i1
+
+let filter_le i1 i2 =
+  match get_high i2 with
+  | Some h2 ->
+      (match i1 with
+       | Range (l, h) -> Range (l, min h h2) |> validate
+       | Inf l -> Range (l, h2) |> validate
+       | Minf u -> Minf (min u h2)
+       | Top -> Minf h2)
+  | None -> i1
